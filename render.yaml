@@ -5,19 +5,11 @@ services:
     envVars:
       - key: PORT
         value: 81
-      - key: ENVIRONMENT
-        fromService:
-          type: web
-          name: my-selenium-grid-driver
-          property: ENVIRONMENT
-
   - type: web
     name: my-selenium-grid-driver
     runtime: docker
     dockerCommand: docker run -d --name my-selenium-grid-driver -p 4444:4444 -p 7900:7900 --shm-size="2g" --privileged seleniarm/standalone-chromium
     envVars:
-      - key: ENVIRONMENT
-        value: production
       - key: PORT_4444
         value: 4444
       - key: PORT_7900
