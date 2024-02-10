@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: ASDA Ingredient Scraper
+  description: This API scrapes ASDA's website for ingredients to provide product names and links.
+  version: 1.0.0
+servers:
+  - url: https://yourdomain.com
+    description: Production server
+paths:
+  /scrape:
+    post:
+      operationId: scrapeIngredients
+      summary: Scrapes ASDA for ingredient data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ingredients:
+                  type: array
+                  items:
+                    type: string
+                  description: A list of ingredients to scrape from ASDA.
+      responses:
+        '200':
+          description: Successfully retrieved product data.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ingredient_name:
+                      type: string
+                      description: The name of the ingredient.
+                    products:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          product_name:
+                            type: string
+                            description: The name of the product found for the ingredient.
+                          product_link:
+                            type: string
+                            description: The URL link to the product page on ASDA.

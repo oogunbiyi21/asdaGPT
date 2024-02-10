@@ -1,0 +1,17 @@
+{
+    "schema_version": "v1",
+    "name_for_human": "Recipe shopping list",
+    "name_for_model": "RecipeShoppingList",
+    "description_for_human": "Creates shopping list for recipe",
+    "description_for_model": "Create a shopping list for a requested recipe, taking into account the amount of each product the user needs and items the user already has if listed. Only pick items that the user needs, and in the correct quantity. Always display results using markdown tables, with the name of the item and the link to that item being displayed.",
+    "auth": {
+        "type": "none"
+    },
+    "api": {
+        "type": "openapi",
+        "url": "[YOUR_DOMAIN, must be HTTPS]/openapi.yaml"
+    },
+    "logo_url": "[YOUR_DOMAIN, must be HTTPS]/logo.png",
+    "contact_email": "support@example.com",
+    "legal_info_url": "https://example.com/legal"
+}
