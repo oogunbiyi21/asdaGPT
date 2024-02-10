@@ -6,6 +6,8 @@ services:
     envVars:
       - key: PORT
         value: 81
+      - key: SELENIUM_HUB_URL
+        value: https://my-selenium-grid-driver.onrender.com/wd/hub
   # - type: web
   #   name: my-selenium-grid-driver
   #   runtime: docker
