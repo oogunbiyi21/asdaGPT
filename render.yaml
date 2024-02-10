@@ -1,5 +1,6 @@
 services:
   - name: asda-scraper-app
+    type: web
     dockerfile: Dockerfile
     privileged: true
     env:
@@ -14,6 +15,7 @@ services:
       - 81:81
 
   - name: my-selenium-grid-driver
+    type: web
     image: seleniarm/standalone-chromium
     privileged: true
     env:
