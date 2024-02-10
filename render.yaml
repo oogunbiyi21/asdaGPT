@@ -1,24 +1,22 @@
 services:
-  - name: asda-scraper-app
-    type: web
-    dockerfile: Dockerfile
-    privileged: true
-    env:
+  - type: web
+    name: asda-scraper-app
+    dockerfileDir: .
+    envVars:
       - key: PORT
         value: 81
-    envVars:
-      - name: ENVIRONMENT
+      - key: ENVIRONMENT
         fromService:
+          type: web
           name: my-selenium-grid-driver
-          key: ENVIRONMENT
+          property: ENVIRONMENT
     ports:
       - 81:81
 
-  - name: my-selenium-grid-driver
-    type: web
+  - type: web
+    name: my-selenium-grid-driver
     image: seleniarm/standalone-chromium
-    privileged: true
-    env:
+    envVars:
       - key: ENVIRONMENT
         value: production
     ports:
