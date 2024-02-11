@@ -3,6 +3,7 @@ from asda_scraper_multithread import scrape_asda
 import socket
 import os
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 
 app = Flask(__name__)
 
@@ -59,7 +60,7 @@ def selenium_check():
     print("ChromeDriver version:", driver.capabilities['chrome']['chromedriverVersion'])
     print("Driver ready!")
     driver.get("http://quotes.toscrape.com/")
-    first_quote_text = driver.find_element_by_css_selector('.quote span.text').text
+    first_quote_text = driver.find_element(By.CSS_SELECTOR, '.quote span.text').text
     driver.quit()
     return first_quote_text, 200
 
