@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, send_from_directory
-from asda_scraper_multithread import scrape_asda 
+from flask import Flask, render_template, request, send_from_directory, jsonify
+from asda_scraper_multithread import scrape_asda, scrape_asda_first_product
 import socket
 import os
 from selenium import webdriver
@@ -63,6 +63,12 @@ def selenium_check():
     first_quote_text = driver.find_element(By.CSS_SELECTOR, '.quote span.text').text
     driver.quit()
     return first_quote_text, 200
+
+@app.route('/asda-check')
+def asda_check():
+    ingredient = "tomato"
+    result = scrape_asda_first_product(ingredient)
+    return jsonify(result)
 
 if __name__ == "__main__":
     if os.environ.get('REMOTE_SERVER') == "1":

@@ -61,3 +61,25 @@ def scrape_asda(recipe_ingredients):
     all_data_df.to_csv("asda_ingredients.csv")
 
     return all_data_list
+
+
+def scrape_asda_first_product(ingredient):
+    print(f"Scraping {ingredient}")
+    hub_url = os.getenv("SELENIUM_HUB_URL", "http://my-selenium-grid-driver:4444/wd/hub")
+    driver = webdriver.Remote(command_executor=hub_url, options=webdriver.ChromeOptions())
+    print("ChromeDriver version:", driver.capabilities['chrome']['chromedriverVersion'])
+    print("Driver ready!")
+
+    base_url = "https://groceries.asda.com/search/"
+
+    full_url = base_url + urllib.parse.quote(ingredient)
+    driver.get(full_url)
+
+    product_element = driver.find_element(By.CLASS_NAME, "co-product")
+    product_name_element = product_element.find_element(By.CLASS_NAME, "co-product__title").find_element(By.TAG_NAME, "a")
+    product_name = product_name_element.text
+    
+    driver.quit()
+    
+    return {'ingredient_name': ingredient, 'first_product_name': product_name}
+
