@@ -58,8 +58,10 @@ def selenium_check():
     driver = webdriver.Remote(command_executor=hub_url, options=webdriver.ChromeOptions())
     print("ChromeDriver version:", driver.capabilities['chrome']['chromedriverVersion'])
     print("Driver ready!")
-
-    return '', 200
+    driver.get("http://quotes.toscrape.com/")
+    first_quote_text = driver.find_element_by_css_selector('.quote span.text').text
+    driver.quit()
+    return first_quote_text, 200
 
 if __name__ == "__main__":
     if os.environ.get('REMOTE_SERVER') == "1":
