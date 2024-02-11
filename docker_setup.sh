@@ -13,7 +13,7 @@ docker run -d --name my-selenium-grid-driver \
     seleniarm/standalone-chromium:latest
 
 # Step 3: Build the asda_scraper_app image
-docker build -t asda_scraper_app .
+docker build --no-cache -t asda_scraper_app .
 
 # Step 4: Run the asda_scraper_app container
 docker run -d --name asda_scraper_app \

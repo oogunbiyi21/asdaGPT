@@ -8,13 +8,6 @@ services:
         value: 81
       - key: SELENIUM_HUB_URL
         value: https://my-selenium-grid-driver.onrender.com/wd/hub
-  # - type: web
-  #   name: my-selenium-grid-driver
-  #   runtime: docker
-  #   plan: free
-  #   dockerCommand: docker run -d --name my-selenium-grid-driver -p 4444:4444 -p 7900:7900 --shm-size="2g" --privileged seleniarm/standalone-chromium
-  #   envVars:
-  #     - key: PORT_4444
-  #       value: 4444
-  #     - key: PORT_7900
-  #       value: 7900
+      - key: REMOTE_SERVER
+        value: 1
+        

@@ -70,7 +70,12 @@ def asda_check():
     result = scrape_asda_first_product(ingredient)
     return jsonify(result)
 
+@app.route('/envir-check')
+def envir_check():
+    return os.getenv("REMOTE_SERVER", "0")
+
 if __name__ == "__main__":
+    print("running asda scraper flask app")
     if os.environ.get('REMOTE_SERVER') == "1":
         print(f"REMOTE SERVER = {os.environ.get('REMOTE_SERVER')}")
         print("remote session")
