@@ -87,8 +87,8 @@ def scrape_asda_first_product(ingredient):
     full_url = base_url + urllib.parse.quote(ingredient)
     driver.get(full_url)
 
-    time.sleep(10)  # Adjust the sleep duration based on your network speed and page load time
-    
+    time.sleep(30)  # Adjust the sleep duration based on your network speed and page load time
+
     product_element = driver.find_element(By.CLASS_NAME, "co-product")
     product_name_element = product_element.find_element(By.CLASS_NAME, "co-product__title").find_element(By.TAG_NAME, "a")
     product_name = product_name_element.text
