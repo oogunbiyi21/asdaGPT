@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, send_from_directory
 from asda_scraper_multithread import scrape_asda 
 import socket
 import os
+from selenium import webdriver
 
 app = Flask(__name__)
 
@@ -47,6 +48,17 @@ def serve_openapi_yaml():
 # Health check endpoint
 @app.route('/health')
 def health_check():
+    return '', 200
+
+
+# selenium webservice check
+@app.route('/selenium-check')
+def selenium_check():
+    hub_url = os.getenv("SELENIUM_HUB_URL", "http://my-selenium-grid-driver:4444/wd/hub")
+    driver = webdriver.Remote(command_executor=hub_url, options=webdriver.ChromeOptions())
+    print("ChromeDriver version:", driver.capabilities['chrome']['chromedriverVersion'])
+    print("Driver ready!")
+
     return '', 200
 
 if __name__ == "__main__":

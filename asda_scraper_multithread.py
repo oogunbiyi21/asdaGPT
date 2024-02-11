@@ -14,8 +14,6 @@ def scrape_ingredient(ingredient):
     # options.add_argument("--window-size=1920,1200")
     # options.add_argument('--disable-dev-shm-usage')
     print(f"Scraping {ingredient}")
-    print("installing ChromeDriverManager")
-
     hub_url = os.getenv("SELENIUM_HUB_URL", "http://my-selenium-grid-driver:4444/wd/hub")
     driver = webdriver.Remote(command_executor=hub_url, options=webdriver.ChromeOptions())
     print("ChromeDriver version:", driver.capabilities['chrome']['chromedriverVersion'])
