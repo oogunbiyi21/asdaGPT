@@ -1,0 +1,11 @@
+[Unit]
+Description=Gunicorn instance for asda scraper
+After=network.target
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/dev/asdaGPT
+ExecStart=/home/ubuntu/dev/asdaGPT/asda_scraper/bin/gunicorn -b localhost:8000 main:main
+Restart=always
+[Install]
+WantedBy=multi-user.target

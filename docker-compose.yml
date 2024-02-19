@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  my-selenium-grid-driver:
+    image: seleniarm/standalone-chromium:latest
+    ports:
+      - "4444:4444"
+      - "7900:7900"
+    shm_size: "2g"
+    privileged: true
+    networks:
+      - my-selenium-network
+
+  asda_scraper_app:
+    build:
+      context: .
+    ports:
+      - "81:81"
+    privileged: true
+    networks:
+      - my-selenium-network
+
+networks:
+  my-selenium-network:
+    driver: bridge
