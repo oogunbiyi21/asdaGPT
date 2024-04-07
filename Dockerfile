@@ -1,5 +1,5 @@
 # Use an official Python 3.12.1 image as a parent image
-FROM python:3.12.1-slim
+FROM python
 
 # Set the working directory in the container
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y wget
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the Flask port
-EXPOSE 81
+EXPOSE 80
 
 # Set environment variable REMOTE_SERVER to 1
 ENV REMOTE_SERVER=1
