@@ -18,7 +18,7 @@ docker build --no-cache -t asda_scraper_app .
 # Step 4: Run the asda_scraper_app container
 docker run -d --name asda_scraper_app \
     --network my-selenium-network \
-    -p 81:81 \
+    -p 80:80 \
     --privileged \
     asda_scraper_app
 
