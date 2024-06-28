@@ -1,66 +1,90 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+from selenium.common.exceptions import WebDriverException
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 import os
 import pandas as pd
 import urllib
 from concurrent.futures import ThreadPoolExecutor
+import threading
+
+# Thread-local storage for Chromedriver instances
+thread_local = threading.local()
 
 def select_driver():
-    if os.environ.get('REMOTE_SERVER') == "1":
-        print(f"REMOTE_SERVER: {os.environ.get('REMOTE_SERVER')}")
-        hub_url = os.getenv("SELENIUM_HUB_URL", "http://my-selenium-grid-driver:4444/wd/hub")
-        driver = webdriver.Remote(command_executor=hub_url, options=webdriver.ChromeOptions())
-        print("ChromeDriver version:", driver.capabilities['chrome']['chromedriverVersion'])
-        print("Driver ready!")
-    else:
-        print("REMOTE_SERVER: 0")
-        print("installing ChromeDriverManager")
-        service = Service(ChromeDriverManager().install())
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--disable-gpu')
-        driver = webdriver.Chrome(service=service, options=chrome_options) 
-        print("ChromeDriverManager installed!")
-    return driver
+    # Check if a Chromedriver instance is already assigned to the current thread
+    if not hasattr(thread_local, "driver") or thread_local.driver is None:
+        if os.environ.get('REMOTE_SERVER') == "1":
+            print(f"REMOTE_SERVER: {os.environ.get('REMOTE_SERVER')}")
+            hub_url = os.getenv("SELENIUM_HUB_URL", "http://my-selenium-grid-driver:4444/wd/hub")
+            driver = webdriver.Remote(command_executor=hub_url, options=webdriver.ChromeOptions())
+            thread_local.driver = driver
+            print("ChromeDriver version:", driver.capabilities['chrome']['chromedriverVersion'])
+            print("Driver ready!")
+        else:
+            print("REMOTE_SERVER: 0")
+            print("installing ChromeDriverManager")
+            service = Service(ChromeDriverManager().install())
+            chrome_options = webdriver.ChromeOptions()
+            chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--disable-gpu')
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+            thread_local.driver = driver
+            print("ChromeDriverManager installed!")
+    return thread_local.driver
 
 
 def scrape_ingredient(ingredient):
-    # options = Options()
-    # options.headless = True
-    # options.add_argument("--window-size=1920,1200")
-    # options.add_argument('--disable-dev-shm-usage')
-    print(f"Scraping {ingredient}")
-    driver = select_driver()
-    base_url = "https://groceries.asda.com/search/"
 
-    full_url = base_url + urllib.parse.quote(ingredient)
-    driver.get(full_url)
+    retries = 3
+    for _ in range(retries):
+        try:
+            # options = Options()
+            # options.headless = True
+            # options.add_argument("--window-size=1920,1200")
+            # options.add_argument('--disable-dev-shm-usage')
+            print(f"Scraping {ingredient}")
+            driver = select_driver()
+            base_url = "https://groceries.asda.com/search/"
 
-    time.sleep(10)  # Adjust the sleep duration based on your network speed and page load time
+            full_url = base_url + urllib.parse.quote(ingredient)
+            driver.get(full_url)
 
-    product_elements = driver.find_elements(By.CLASS_NAME, "co-product")
-    print("product element found")
+            time.sleep(10)  # Adjust the sleep duration based on your network speed and page load time
 
-    product_names = []
-    product_links = []
+            product_elements = driver.find_elements(By.CLASS_NAME, "co-product")
+            print("product element found")
 
-    for product_element in product_elements:
-        product_name_element = product_element.find_element(By.CLASS_NAME, "co-product__title").find_element(
-            By.TAG_NAME, "a")
-        product_name = product_name_element.text
-        product_names.append(product_name)
+            product_names = []
+            product_links = []
 
-        product_link = product_name_element.get_attribute("href")
-        product_links.append(product_link)
+            for product_element in product_elements:
+                product_name_element = product_element.find_element(By.CLASS_NAME, "co-product__title").find_element(
+                    By.TAG_NAME, "a")
+                product_name = product_name_element.text
+                product_names.append(product_name)
 
-    driver.quit()
+                product_link = product_name_element.get_attribute("href")
+                product_links.append(product_link)
 
-    return {'ingredient_name': ingredient, 'products': [{'product_name': name, 'product_link': link} for name, link in
+            driver.quit()
+            return {'ingredient_name': ingredient, 'products': [{'product_name': name, 'product_link': link} for name, link in
                                                         zip(product_names, product_links)]}
-
+        except WebDriverException as e:
+            print(f"WebDriverException occurred: {e}")
+            if _ < retries - 1:
+                print(f"Retrying {ingredient}...")
+                time.sleep(5)  # Wait before retrying
+            else:
+                print(f"Failed to scrape {ingredient} after {retries} retries.")
+                return {'ingredient_name': ingredient, 'products': []}
+        finally:
+            if hasattr(thread_local, "driver") and thread_local.driver:
+                thread_local.driver.quit()
+                thread_local.driver = None
+    
 
 def scrape_asda(recipe_ingredients):
     with ThreadPoolExecutor() as executor:
@@ -95,5 +119,5 @@ def scrape_asda_first_product(ingredient):
     
     driver.quit()
     
-    return {'ingredient_name': ingredient, 'first_product_name': product_name}
+    return [{'ingredient_name': ingredient, 'first_product_name': product_name}]
 

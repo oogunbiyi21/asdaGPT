@@ -15,7 +15,7 @@ services:
     build:
       context: .
     ports:
-      - "81:81"
+      - "80:80"
     privileged: true
     networks:
       - my-selenium-network

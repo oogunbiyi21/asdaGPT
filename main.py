@@ -1,64 +1,85 @@
-from flask import Flask, render_template, request, send_from_directory, jsonify
+from flask import Flask, render_template, request, send_from_directory, jsonify, redirect
 from asda_scraper_multithread import scrape_asda, scrape_asda_first_product
 import socket
 import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+import openai
 
 app = Flask(__name__)
+
+# Configure OpenAI API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-
-@app.route('/scrape', methods=['GET', 'POST'])
+@app.route('/scrape', methods=['POST'])
 def scrape():
-    if request.method == 'GET':
-        ingredients = request.args.get('ingredients')
-        if ingredients:
-            ingredients_list = [ingredient.strip() for ingredient in ingredients.split(',')]
+    query = request.form.get('query')
+    
+    # Step 1: Get recipe text from ChatGPT
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"Provide a recipe for: {query}"}
+        ]
+    )
+    recipe = response['choices'][0]['message']['content'].strip()
+    
+    # Step 2: Ask ChatGPT to list out food items
+    food_items_response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"List the food items in the recipe only, with no other text. And just the type of food, no measurements: {recipe}"}
+        ]
+    )
+    ingredients = food_items_response['choices'][0]['message']['content'].strip()
+    print(ingredients)
+    food_items = [ingredient.strip().lstrip('- ') for ingredient in ingredients.split('\n') if ingredient.strip()]
+    print(food_items)
 
-            # Call scraper function
-            scraped_data = scrape_asda(ingredients_list)
+    # Step 3: Scrape ASDA using food items
+    # scraped_data = scrape_asda(food_items)
 
-            return render_template('result.html', data=scraped_data)
+    if food_items:
+        scraped_data = scrape_asda(food_items)
+    else:
+        scraped_data = []
+    
+    # Redirect to results page with recipe and scraped data
+    return render_template('result.html', recipe=recipe, data=scraped_data)
 
-    if request.method == 'POST':
-        ingredients = request.form.get('ingredients')
-        ingredients_list = [ingredient.strip() for ingredient in ingredients.split(',')]
 
-        # Call scraper function
-        scraped_data = scrape_asda(ingredients_list)
-
-        return render_template('result.html', data=scraped_data)
-
+def extract_food_items(text):
+    # Tokenize the text into words
+    words = word_tokenize(text)
+    # Perform Part-of-Speech (POS) tagging
+    tagged_words = pos_tag(words)
+    # Extract nouns (NN) and proper nouns (NNP) as potential food items
+    food_items = [word for word, tag in tagged_words if tag in ['NN', 'NNP']]
+    return food_items
 
 @app.route('/.well-known/ai-plugin.json')
 def serve_ai_plugin():
-    return send_from_directory('.',
-                               'ai-plugin.json',
-                               mimetype='application/json',)
-
+    return send_from_directory('.', 'ai-plugin.json', mimetype='application/json')
 
 @app.route('/swagger.yaml')
 def serve_openapi_yaml():
     return send_from_directory('.', 'swagger.yaml', mimetype='text/yaml')
 
-
-# Health check endpoint
 @app.route('/health')
 def health_check():
     return '', 200
 
-
-# selenium webservice check
 @app.route('/selenium-check')
 def selenium_check():
     hub_url = os.getenv("SELENIUM_HUB_URL", "http://my-selenium-grid-driver:4444/wd/hub")
     driver = webdriver.Remote(command_executor=hub_url, options=webdriver.ChromeOptions())
-    print("ChromeDriver version:", driver.capabilities['chrome']['chromedriverVersion'])
-    print("Driver ready!")
     driver.get("http://quotes.toscrape.com/")
     first_quote_text = driver.find_element(By.CSS_SELECTOR, '.quote span.text').text
     driver.quit()

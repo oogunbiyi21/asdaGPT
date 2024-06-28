@@ -4,17 +4,25 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scraped Data</title>
+    <title>Recipe Scraper Results</title>
 </head>
 <body>
-    <h1>Scraped Data</h1>
-    {% for entry in data %}
-        <p><strong>Ingredient:</strong> {{ entry['ingredient_name'] }}</p>
-        <ul>
-            {% for product in entry['products'] %}
-                <li><a href="{{ product['product_link'] }}" target="_blank">{{ product['product_name'] }}</a></li>
-            {% endfor %}
-        </ul>
-    {% endfor %}
+    <h1>Recipe Scraper Results</h1>
+    
+    <!-- Display recipe if available -->
+    {% if recipe %}
+    <h2>Recipe</h2>
+    <p>{{ recipe }}</p>
+    
+    <!-- Display scraped data from ASDA if available -->
+    {% if data %}
+    <h2>Scraped Data from ASDA</h2>
+    <ul>
+        {% for item in data %}
+        <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endif %}
 </body>
 </html>

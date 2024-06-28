@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+</head>
+<body>
+    <h1>Recipe</h1>
+    <p>{{ recipe }}</p>
+
+    <h2>Ingredients</h2>
+    <ul>
+        {% for ingredient in ingredients %}
+        <li>{{ ingredient }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Scrape Ingredients from ASDA</h2>
+    <form action="/scrape" method="post">
+        <input type="hidden" name="ingredients" value="{{ ','.join(ingredients) }}">
+        <button type="submit">Scrape ASDA</button>
+    </form>
+</body>
+</html>

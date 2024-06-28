@@ -4,14 +4,28 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASDA Scraper</title>
+    <title>Recipe Scraper</title>
 </head>
 <body>
-    <h1>ASDA Scraper</h1>
+    <h1>Recipe Scraper</h1>
     <form action="/scrape" method="post">
-        <label for="ingredients">Enter ingredients (comma-separated):</label>
-        <input type="text" id="ingredients" name="ingredients" required>
-        <button type="submit">Scrape ASDA</button>
+        <label for="query">Enter recipe query:</label>
+        <input type="text" id="query" name="query" required>
+        <button type="submit">Get Recipe and Scrape ASDA</button>
     </form>
+    
+    {% if recipe %}
+    <h2>Recipe</h2>
+    <p>{{ recipe }}</p>
+    
+    {% if data %}
+    <h2>Scraped Data from ASDA</h2>
+    <ul>
+        {% for item in data %}
+        <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endif %}
 </body>
 </html>

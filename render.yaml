@@ -5,7 +5,7 @@ services:
     plan: free
     envVars:
       - key: PORT
-        value: 81
+        value: 80
       - key: SELENIUM_HUB_URL
         value: https://my-selenium-grid-driver.onrender.com/wd/hub
       - key: REMOTE_SERVER
