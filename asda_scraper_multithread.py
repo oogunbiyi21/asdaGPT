@@ -9,6 +9,7 @@ import pandas as pd
 import urllib
 from concurrent.futures import ThreadPoolExecutor
 import threading
+import openai
 
 # Thread-local storage for Chromedriver instances
 thread_local = threading.local()
@@ -41,10 +42,6 @@ def scrape_ingredient(ingredient):
     retries = 3
     for _ in range(retries):
         try:
-            # options = Options()
-            # options.headless = True
-            # options.add_argument("--window-size=1920,1200")
-            # options.add_argument('--disable-dev-shm-usage')
             print(f"Scraping {ingredient}")
             driver = select_driver()
             base_url = "https://groceries.asda.com/search/"
@@ -57,21 +54,17 @@ def scrape_ingredient(ingredient):
             product_elements = driver.find_elements(By.CLASS_NAME, "co-product")
             print("product element found")
 
-            product_names = []
-            product_links = []
+            products = []
 
             for product_element in product_elements:
-                product_name_element = product_element.find_element(By.CLASS_NAME, "co-product__title").find_element(
-                    By.TAG_NAME, "a")
+                product_name_element = product_element.find_element(By.CLASS_NAME, "co-product__title").find_element(By.TAG_NAME, "a")
                 product_name = product_name_element.text
-                product_names.append(product_name)
-
                 product_link = product_name_element.get_attribute("href")
-                product_links.append(product_link)
+                products.append({'product_name': product_name, 'product_link': product_link})
 
             driver.quit()
-            return {'ingredient_name': ingredient, 'products': [{'product_name': name, 'product_link': link} for name, link in
-                                                        zip(product_names, product_links)]}
+            return {'ingredient_name': ingredient, 'products': products}
+            
         except WebDriverException as e:
             print(f"WebDriverException occurred: {e}")
             if _ < retries - 1:
@@ -85,21 +78,40 @@ def scrape_ingredient(ingredient):
                 thread_local.driver.quit()
                 thread_local.driver = None
     
+def choose_best_product(ingredient_data, recipe):
+    openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def scrape_asda(recipe_ingredients):
+    ingredient_name = ingredient_data['ingredient_name']
+    products = ingredient_data['products']
+    
+    prompt = f"Given the following recipe:\n\n{recipe}\n\nAnd the following products for the ingredient '{ingredient_name}', please choose the best one for the recipe. Provide the product name and link:\n\n"
+
+    for product in products:
+        prompt += f"Product Name: {product['product_name']}\nProduct Link: {product['product_link']}\n\n"
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    return response.choices[0].message['content'].strip()
+
+def scrape_asda(recipe_ingredients, recipe):
     with ThreadPoolExecutor() as executor:
         results = executor.map(scrape_ingredient, recipe_ingredients)
 
-    all_data_df = pd.DataFrame()
     all_data_list = list(results)
+    best_products = []
+
     for data in all_data_list:
-        ingredient_df = pd.DataFrame(data['products'])
-        ingredient_df['ingredient_name'] = data['ingredient_name']
-        all_data_df = pd.concat([all_data_df, ingredient_df], ignore_index=True)
+        if data['products']:
+            best_product = choose_best_product(data, recipe)
+            best_products.append(best_product)
 
-    all_data_df.to_csv("asda_ingredients.csv")
-
-    return all_data_list
+    return best_products
 
 
 def scrape_asda_first_product(ingredient):

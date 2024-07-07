@@ -5,24 +5,31 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Scraper Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        p {
+            white-space: pre-wrap; /* Preserves formatting */
+            word-wrap: break-word;
+        }
+    </style>
 </head>
 <body>
     <h1>Recipe Scraper Results</h1>
     
-    <!-- Display recipe if available -->
-    {% if recipe %}
-    <h2>Recipe</h2>
-    <p>{{ recipe }}</p>
-    
-    <!-- Display scraped data from ASDA if available -->
-    {% if data %}
-    <h2>Scraped Data from ASDA</h2>
+    <h2>Instructions</h2>
+    <p>
+        {{ instructions }}
+    </p>
+
+    <h2>Best Products for Each Ingredient</h2>
     <ul>
-        {% for item in data %}
-        <li>{{ item }}</li>
+        {% for product in best_products %}
+        <li>{{ product | safe }}</li>
         {% endfor %}
     </ul>
-    {% endif %}
-    {% endif %}
 </body>
 </html>

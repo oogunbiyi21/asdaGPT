@@ -47,22 +47,14 @@ def scrape():
     # scraped_data = scrape_asda(food_items)
 
     if food_items:
-        scraped_data = scrape_asda(food_items)
+        scraped_data = scrape_asda(food_items, recipe)
     else:
         scraped_data = []
     
     # Redirect to results page with recipe and scraped data
-    return render_template('result.html', recipe=recipe, data=scraped_data)
-
-
-def extract_food_items(text):
-    # Tokenize the text into words
-    words = word_tokenize(text)
-    # Perform Part-of-Speech (POS) tagging
-    tagged_words = pos_tag(words)
-    # Extract nouns (NN) and proper nouns (NNP) as potential food items
-    food_items = [word for word, tag in tagged_words if tag in ['NN', 'NNP']]
-    return food_items
+    print(recipe)
+    print(scraped_data)
+    return render_template('result.html', instructions=recipe, best_products=scraped_data)
 
 @app.route('/.well-known/ai-plugin.json')
 def serve_ai_plugin():
