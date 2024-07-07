@@ -84,7 +84,7 @@ def choose_best_product(ingredient_data, recipe):
     ingredient_name = ingredient_data['ingredient_name']
     products = ingredient_data['products']
     
-    prompt = f"Given the following recipe:\n\n{recipe}\n\nAnd the following products for the ingredient '{ingredient_name}', please choose the best one for the recipe. Provide the product name and link:\n\n"
+    prompt = f"Given the following recipe:\n\n{recipe}\n\nAnd the following products for the ingredient '{ingredient_name}', please choose the best one for the recipe. Provide the product name and link in the format: Based on the recipe for Jollof Rice, the best product for the ingredient '{ingredient_name}' would be: <strong>Product Name:</strong> [PRODUCT_NAME] <strong>Product Link:</strong> <a href=\"[PRODUCT_LINK]\">[PRODUCT_NAME]</a>. Include an explanation on why this product is suitable for the recipe:\n\n"
 
     for product in products:
         prompt += f"Product Name: {product['product_name']}\nProduct Link: {product['product_link']}\n\n"

@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Scraper Results</title>
     <style>
@@ -11,25 +10,47 @@
             line-height: 1.6;
             margin: 20px;
         }
-        p {
-            white-space: pre-wrap; /* Preserves formatting */
-            word-wrap: break-word;
+        h1, h2 {
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .instructions {
+            margin-bottom: 20px;
+        }
+        .product {
+            margin-bottom: 15px;
+        }
+        .product a {
+            color: #1a0dab;
+            text-decoration: none;
+        }
+        .product a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <h1>Recipe Scraper Results</h1>
-    
-    <h2>Instructions</h2>
-    <p>
-        {{ instructions }}
-    </p>
-
-    <h2>Best Products for Each Ingredient</h2>
-    <ul>
-        {% for product in best_products %}
-        <li>{{ product | safe }}</li>
-        {% endfor %}
-    </ul>
+    <div class="container">
+        <h1>Recipe Scraper Results</h1>
+        <div class="instructions">
+            <h2>Instructions</h2>
+            <p>{{ instructions }}</p>
+        </div>
+        <div class="best-products">
+            <h2>Best Products for Each Ingredient</h2>
+            {% for product in best_products %}
+                <div class="product">
+                    <p>{{ product | safe }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>
