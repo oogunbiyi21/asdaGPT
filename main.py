@@ -140,11 +140,17 @@ def scrape():
     recipe = response['choices'][0]['message']['content'].strip()
     
     # Step 2: Ask ChatGPT to list out food items
+    ingredient_example = """
+    Eggs
+    Cheese
+    Ham
+    """
+
     food_items_response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"List the food items in the recipe only, with no other text. And just the type of food, no measurements: {recipe}"}
+            {"role": "user", "content": f"List the food items in the recipe only, with no other text, in a list. And just the type of food, no measurements. \nAn example: {ingredient_example}. \nThis the recipe: {recipe} \n Please provide the list of ingredients."}
         ]
     )
     ingredients = food_items_response['choices'][0]['message']['content'].strip()
