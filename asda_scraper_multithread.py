@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 import openai
 
+
 # Thread-local storage for Chromedriver instances
 thread_local = threading.local()
 
@@ -27,13 +28,18 @@ def select_driver():
         else:
             print("REMOTE_SERVER: 0")
             print("installing ChromeDriverManager")
-            service = Service(ChromeDriverManager().install())
-            chrome_options = webdriver.ChromeOptions()
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--disable-gpu')
-            driver = webdriver.Chrome(service=service, options=chrome_options)
-            thread_local.driver = driver
-            print("ChromeDriverManager installed!")
+            try:
+                service = Service(ChromeDriverManager().install())
+                chrome_options = webdriver.ChromeOptions()
+                chrome_options.add_argument('--headless')
+                chrome_options.add_argument('--disable-gpu')
+                driver = webdriver.Chrome(service=service, options=chrome_options)
+                thread_local.driver = driver
+                print("ChromeDriverManager installed!")
+            except Exception as e:
+                print(f"Error installing ChromeDriverManager: {e}")
+                print("ChromeDriverManager not installed!")
+                raise e
     return thread_local.driver
 
 
@@ -84,7 +90,24 @@ def choose_best_product(ingredient_data, recipe):
     ingredient_name = ingredient_data['ingredient_name']
     products = ingredient_data['products']
     
-    prompt = f"Given the following recipe:\n\n{recipe}\n\nAnd the following products for the ingredient '{ingredient_name}', please choose the best one for the recipe. Provide the product name and link in the format: Based on the recipe for Jollof Rice, the best product for the ingredient '{ingredient_name}' would be: <strong>Product Name:</strong> [PRODUCT_NAME] <strong>Product Link:</strong> <a href=\"[PRODUCT_LINK]\">[PRODUCT_NAME]</a>. Include an explanation on why this product is suitable for the recipe:\n\n"
+    example = """Based on the recipe, the best product for the ingredient 'Onion' would be: 
+    <strong>Product Name:</strong> ASDA 3 Crunchy & Fragrant Brown Onions 
+    <strong>Product Link:</strong> <a href="https://groceries.asda.com/product/onions-leeks/asda-3-crunchy-fragrant-brown-onions/910003012588">ASDA 3 Crunchy & Fragrant Brown Onions</a>. 
+    Explanation: These brown onions are suitable for sautéing with other vegetables in the recipe. They provide a balanced flavor profile and are commonly used in cooking savory dishes like jollof rice. The pack size of 3 onions should provide an appropriate amount for the recipe, and their crunchy and fragrant nature will enhance the overall taste of the dish.
+    """
+
+    prompt = f"""Given the following recipe:\n\n{recipe}\n\nAnd the following products for the ingredient '{ingredient_name}', please choose the best one for the recipe. You must choose from the provided products and no other. Provide the product name and link in HTML format as follows: 
+
+    Based on the recipe, the best product for the ingredient '{ingredient_name}' would be: 
+    <strong>Product Name:</strong> [PRODUCT_NAME] 
+    <strong>Product Link:</strong> <a href="[PRODUCT_LINK]">[PRODUCT_NAME]</a>. 
+    Explanation: [EXPLANATION]
+
+    Here is an example format for the ingredient 'Onion':
+
+    {example}
+
+    Ensure that only products from the product list are chosen. Now, please choose the best product from the list below and provide it in the format shown above with an explanation on why this product is suitable for the recipe:\n\n"""
 
     for product in products:
         prompt += f"Product Name: {product['product_name']}\nProduct Link: {product['product_link']}\n\n"
@@ -98,6 +121,7 @@ def choose_best_product(ingredient_data, recipe):
     )
 
     return response.choices[0].message['content'].strip()
+
 
 def scrape_asda(recipe_ingredients, recipe):
     with ThreadPoolExecutor() as executor:
