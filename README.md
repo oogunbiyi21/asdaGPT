@@ -1,5 +1,3 @@
-Here's the updated `README.md` file with the inclusion of the `local_setup.sh` script for local development setup.
-
 ---
 
 # ASDA Scraper
